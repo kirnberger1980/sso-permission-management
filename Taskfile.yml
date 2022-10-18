@@ -1,0 +1,68 @@
+version: '3'
+#output: prefixed
+vars:
+  account:
+    sh: aws sts get-caller-identity |jq -r .Account
+  tags:
+    sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
+tasks:
+  deploy:
+    desc: Deploy Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - cdk deploy --all --require-approval never {{.tags}}
+  synth:
+    desc: synth Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - cdk synth
+  diff:
+    desc: synth Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - cdk diff
+  destroy:
+    desc: synth Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - cdk destroy
+  clean:
+    desc: Clean CDK Out
+    cmds:
+      - rm -rf ./cdk.out
+      - rm -rf ./node-modules
+    silent: true
+  setvariable:
+    desc: Unset / Set Parameters Variable
+    deps: [check_requirements]
+    cmds:
+      - CDK_DEFAULT_REGION=$AWS_DEFAULT_REGION
+      - CDK_DEFAULT_ACCOUNT="{{.account}}"
+    silent: true
+  bootstrap:
+    desc: CDK Bootstrap
+    cmds:
+      - task: synth
+      - cdk bootstrap --require-approval never
+    vars:
+      ACCOUNT:
+        sh: aws sts get-caller-identity |jq -r .Account
+    silent: true
+  check_requirements:
+    desc: Just to test
+    cmds:
+      - jq --version
+      - aws --version
+      - cdk --version
+    preconditions:
+      - sh: "command -v jq"
+        msg: "yq is not installed. Please refer to: https://stedolan.github.io/jq/"
+      - sh: "command -v aws"
+        msg: "'aws' is not installed. Please refer to: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+      - sh: "command -v cdk"
+        msg: "'cdk' is not installed. Please refer to: https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html"
+    silent: true
