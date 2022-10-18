@@ -37,16 +37,3 @@ export async function assignPermissionSets(event: EventBridgeEvent<string, OrgEv
   }
   return null;
 }
-
-// (async() => {
-//   const accountId = await getAccountId("bdp-sandbox");
-//   if (accountId) {
-//     const assignments = await createAssignment(accountId, "AdminRole", "RESS_HV_SW_BC_OGS_DEV", "prod.d001.loc");
-//     console.log(assignments);
-//   }
-//   console.time("assignments");
-//   const assignmentProps = await getCurrentAssignments("prod.d001.loc");
-//   console.log(assignmentProps);
-//   console.timeEnd("assignments");
-//   await assignPermissionSets({});
-// })()
