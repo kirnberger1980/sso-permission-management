@@ -112,11 +112,11 @@ Since the deletion/creation of assignments runs asynchronously, each assignment 
 
 ### Requirements
 
-- `task` to run the different tasks specified in `Taskfile.yml`
-- `aws` CLI Version 2.x
-- `cdk` Version 2.x
-- `jq` is used by `task`
-- `docker` or `esbuild` for Transpiling the Lambda Function
+- [task](https://taskfile.dev/) to run the different tasks specified in `Taskfile.yml`
+- [aws](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) CLI Version 2.x
+- [cdk](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html) Version 2.x
+- [jq](https://stedolan.github.io/jq/) is used in our `task` configuration
+- [docker](https://docs.docker.com/engine/install/) or [esbuild](https://esbuild.github.io/getting-started/#install-esbuild) for Transpiling the Lambda Function
 
 ### Deployment
 
