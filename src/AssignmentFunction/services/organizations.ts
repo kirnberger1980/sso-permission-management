@@ -1,4 +1,4 @@
-import { OrganizationsClient, ListAccountsForParentCommand, ListRootsCommand, ListChildrenCommand, DescribeOrganizationalUnitCommand, ListAccountsCommand } from "@aws-sdk/client-organizations";
+import { OrganizationsClient, ListAccountsForParentCommand, ListRootsCommand, ListChildrenCommand, DescribeOrganizationalUnitCommand, ListAccountsCommand, ListOrganizationalUnitsForParentCommand } from "@aws-sdk/client-organizations";
 
 const client = new OrganizationsClient({ region: process.env.AWS_REGION });
 
@@ -27,13 +27,8 @@ export async function listActiveAccountsForOu(organizationUnitName: string) {
   }
   const ouId = await getOuIdFromOuName(organizationUnitName);
   if (ouId) {
-    const command = new ListAccountsForParentCommand({
-      ParentId: ouId
-    });
-    const response = await client.send(command);
-    const accounts = response.Accounts?.filter(account => account.Status === "ACTIVE").map(account => {
-      return {id: account.Id, name: account.Name};
-    });
+    const accounts : Account[] = [];
+    await getAllAccountsOfOu(ouId, accounts);
     if (accounts && accounts.length > 0) {
       ouAccountMappings.push({
         organizationUnitName,
@@ -113,4 +108,31 @@ async function searchTree(ouName: string, ouObject?: OuObject): Promise<string |
       return undefined;
     }
   }
+}
+
+async function getAllAccountsOfOu(ouId: string, accounts: Account[]){
+  const lafpCommand = new ListAccountsForParentCommand({
+    ParentId: ouId
+  });
+  const lafpResponse = await client.send(lafpCommand);
+  lafpResponse.Accounts?.filter(account => account.Status === "ACTIVE").map(account => {
+    return {id: account.Id, name: account.Name};
+  }).forEach(account => {
+    if (account.id && account.name) {
+      accounts.push(account);
+    }
+  });
+  const lofpCommand = new ListOrganizationalUnitsForParentCommand({
+    ParentId: ouId
+  });
+  const lofpResponse = await client.send(lofpCommand);
+  const promiseArray = [];
+  if (lofpResponse.OrganizationalUnits) {
+    for (const ou of lofpResponse.OrganizationalUnits) {
+      if (ou.Id) {
+        promiseArray.push(getAllAccountsOfOu(ou.Id, accounts));
+      }
+    }
+  }
+  await Promise.all(promiseArray);
 }

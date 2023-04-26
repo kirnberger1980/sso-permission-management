@@ -32,6 +32,7 @@ export function getAssignmentFunctionPolicyStatements(statementProps: StatementP
    */
   AssignmentFunctionPolicyStatements.push(new statement.Organizations().allow()
     .toListAccountsForParent().onAllResources()
+    .toListOrganizationalUnitsForParent().onAllResources()
     .toListRoots().onAllResources()
     .toListChildren().onAllResources()
     .toDescribeOrganizationalUnit().onAllResources()
